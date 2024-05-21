@@ -11,115 +11,109 @@ public class ProjectileGrenade : MonoBehaviour
     public float shootForce, upwardForce;
 
     //Gun stats
-    public float spread;
+    public float delay = 3f;
+    float countdown;
+    public float radius;
+    public float force;
 
-  
-  
-
-   
-
-    //Recoil
-    public Rigidbody playerRb;
-   
 
     //bools
     bool shooting, readyToShoot, reloading;
+    bool hasExploded = false;
 
     //Reference
     public Camera fpsCam;
     public Transform attackPoint;
 
     //Graphics
-    public GameObject muzzleFlash;
-    public TextMeshProUGUI ammunitionDisplay;
-
+    public GameObject ExplodeEffect;
     //bug fixing :D
     public bool allowInvoke = true;
-
+    // Reference
     public GameObject player;
     private float zgun;
     Rigidbody rb;
+    SphereCollider sC;
+    
     private void Awake()
     {
-        //make sure magazine is full
-       
         readyToShoot = true;
         rb = GetComponent<Rigidbody>();
+        sC = GetComponent<SphereCollider>();
     }
 
+    void Start()
+    {
+        countdown = delay;
+    }
     private void Update()
     {   
         if (CameraControll.grenade_equipped)
         {
             MyInput();
         }
-        
-
-        //Set ammo display, if it exists :D
-       
     }
     private void MyInput()
     {
-        //Check if allowed to hold down button and take corresponding input
-        
         shooting = Input.GetKeyDown(KeyCode.Mouse0);
-
-        //Reloading 
-       
-        //Reload automatically when trying to shoot without ammo
-        
         //Shooting
+        
         if (readyToShoot && shooting)
         {
             //Set bullets shot to 0
-        
-          
-
             Shoot();
-            
-            
+            Invoke("Explode", 3f);
         }
+        
+       
     }
 
     private void Shoot()
     {
         readyToShoot = false;
         transform.SetParent(null);
-
+        rb.isKinematic = false;
+        sC.isTrigger = false;
         //Find the exact hit position using a raycast
         Ray ray = fpsCam.ScreenPointToRay(Input.mousePosition); //Just a ray through the middle of your current view
         RaycastHit hit;
-
-        //check if ray hits something
-       
         Vector3 targetPoint = ray.GetPoint(30);
-         //Just a point far away from the player
-
         //Calculate direction from attackPoint to targetPoint
         Vector3 directionWithoutSpread = targetPoint - attackPoint.position;
-    
-
-        //Calculate spread
-        float x = Random.Range(-spread, spread);
-        float y = Random.Range(-spread, spread);
-
         //Calculate new direction with spread
-        Vector3 directionWithSpread = directionWithoutSpread + new Vector3(x, y, 0); //Just add spread to last direction
-
-        //Instantiate bullet/projectile
-        // GameObject currentBullet = Instantiate(grenade, attackPoint.position, Quaternion.identity); //store instantiated bullet in currentBullet
+        Vector3 directionWithSpread = directionWithoutSpread; //Just add spread to last direction
         //Rotate bullet to shoot direction
         transform.forward = directionWithSpread.normalized;
-        
-
         //Add forces to bullet
         rb.AddForce(directionWithSpread.normalized * shootForce, ForceMode.Impulse);
         rb.AddForce(fpsCam.transform.up * upwardForce, ForceMode.Impulse);
 
-        //Instantiate muzzle flash, if you have one
+        // Explode
+        
+
+      
     
         
     }
+
+    public void Explode()
+    {   
+        
+         Instantiate(ExplodeEffect, transform.position, transform.rotation);
+         Collider[] obj_collider = Physics.OverlapSphere(transform.position, radius);
+         foreach (Collider nearby_obj in obj_collider)
+         {
+            Rigidbody obj_rb = nearby_obj.GetComponent<Rigidbody>();
+            if (obj_rb != null)
+            {
+                obj_rb.AddExplosionForce(force, transform.position, radius);
+            }
+         }
+        
+         Destroy(gameObject);
+    }
+     
+    
     
 }
 

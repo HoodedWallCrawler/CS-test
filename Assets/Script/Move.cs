@@ -51,7 +51,7 @@ public class Move : MonoBehaviour
 
         if (Input.GetKey(KeyCode.Space) && Grounded)
         {
-            rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y,0) ;
+            rb.linearVelocity = new Vector3(rb.linearVelocity.x, rb.linearVelocity.y,0) ;
             rb.AddForce(Vector3.up * jumpforce * Time.deltaTime ,ForceMode.Impulse);
         }
 
