@@ -15,6 +15,7 @@ public class Move : MonoBehaviour
     
     public Camera cam;
 
+    public static float health = 100;
     
     
     // Start is called before the first frame update
@@ -56,5 +57,13 @@ public class Move : MonoBehaviour
         }
 
 
+    }
+
+    void OnCollisionEnter (Collision otherpart)
+    {
+        if (otherpart.gameObject.tag == "Bullet")
+        {
+            health -= 10;
+        }
     }
 }

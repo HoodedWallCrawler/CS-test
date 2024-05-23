@@ -37,6 +37,7 @@ public class ProjectileGunTutorial : MonoBehaviour
 
     public GameObject player;
     private float zgun;
+    public static float health = 100;
 
     private void Awake()
     {
@@ -152,5 +153,13 @@ public class ProjectileGunTutorial : MonoBehaviour
         //Fill magazine
         bulletsLeft = magazineSize;
         reloading = false;
+    }
+
+    void OnCollisionEnter (Collision otherpart)
+    {
+        if (otherpart.gameObject.tag == "Bullet")
+        {
+            health -= 10;
+        }
     }
 }
